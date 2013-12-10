@@ -1,0 +1,10 @@
+.eunit
+*.o
+*.beam
+*.plt
+erl_crash.dump
+log/
+ebin/
+deps/
+rel/esque/
+logs/

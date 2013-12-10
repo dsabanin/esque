@@ -1,0 +1,21 @@
+{application, esque,
+  [
+  {description, "Esque"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [kernel, stdlib, lager]},
+  {mod, {esque, []}},
+  {env, [ 
+    {redis_port, 6379},
+    {redis_host, "localhost"},
+    {redis_pool,[
+      {overrun_warning,2000},
+      {workers,5},
+      {worker_config,[{host, "localhost"},
+        {port, 6379},
+        {database, 0},
+        {pwd, ""},
+        {reconnect_sleep, 100}]}
+      ]}
+    ]}  
+  ]}. 
