@@ -7,7 +7,8 @@ all() ->
   [
     start_test,
     add_queue,
-    stop_queue
+    stop_queue,
+    multiple_workers
   ].
 
 start_test(Config) ->
@@ -20,7 +21,7 @@ add_queue(Config) ->
   esque:add_queue([{name, "add_queue_test"}, {workers, 1}, {action, {esque_SUITE, add_queue_callback}}]),
   esque:queue([{name, "add_queue_test"}], [self()]),
   receive
-    done -> ok
+    done -> ct:log("got done")
   after 2000 ->
     throw(queue_not_processed)
   end,
@@ -34,6 +35,25 @@ stop_queue(Config) ->
   case whereis(esque_puller_delete) of
     undefined -> throw(failed);
     D when is_pid(D) -> ok
+  end,
+  Config.
+
+multiple_workers(Config) ->
+  start_test(Config),
+  esque:add_queue([{name, "multiple_workers"}, {workers, 100}, {action, {esque_SUITE, add_queue_callback}}]),
+  Pid = self(),
+  lists:map(fun(_) -> spawn(fun() -> esque:queue(multiple_workers, [], [self()]),
+                            receive
+                              done -> ct:log("got done")
+                            after 2000 ->
+                              Pid ! error
+                            end
+                        end)
+                  end, lists:seq(1,1000)),
+  receive
+    error -> throw(timeout_multiple_workers)
+  after 3000 ->
+    ok
   end,
   Config.
 

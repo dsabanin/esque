@@ -15,6 +15,7 @@
 -export([
     add_queue/1,
     stop_queue/1,
+    queue/3,
     queue/2
     ]).
 
@@ -55,11 +56,16 @@ stop_queue(QueueParams) ->
   supervisor:terminate_child(esque_puller_sup, Spec),
   supervisor:delete_child(esque_puller_sup, Spec).
 
--spec queue([tuple()], term()) -> integer().
-queue(QueueParams, Payload) ->
+-spec queue(atom() | string() , [tuple()], term()) -> integer().
+queue(QueueName, QueueParams, Payload) when is_atom(QueueName) ->
+  queue(atom_to_list(QueueName), QueueParams, Payload);
+queue(QueueName, QueueParams, Payload) when is_list(QueueName) ->
+  queue([{name, QueueName}] ++ proplists:delete(name, QueueParams), Payload).
+
+-spec queue([tuple()], list()) -> integer().
+queue(QueueParams, Payload) when is_list(QueueParams) ->
   Name = ?QUEUE_NAME(QueueParams),
   Key = ?QUEUE_KEY(Name),
-  lager:info("queue key is ~p", [Key]),
   Command = [
     ["multi"],
     ["lpush", [Key], erlang:term_to_binary(Payload)],
