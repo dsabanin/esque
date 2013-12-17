@@ -27,8 +27,14 @@ add_queue(Config) ->
   Config.
 
 stop_queue(Config) ->
-  esque:add_queue([{name, "q2delete"}]),
-  esque:stop_queue([{name, "q2delete"}]),
+  start_test(Config),
+  esque:add_queue([{name, "delete"}]),
+  esque:stop_queue([{name, "delete"}]),
+  esque:add_queue([{name, "delete"}]),
+  case whereis(esque_puller_delete) of
+    undefined -> throw(failed);
+    D when is_pid(D) -> ok
+  end,
   Config.
 
 add_queue_callback(Pid) ->

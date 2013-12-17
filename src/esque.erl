@@ -50,8 +50,10 @@ add_queue(Q) ->
 
 -spec stop_queue([tuple()]) -> ok.
 stop_queue(QueueParams) -> 
-  Spec = sup_spec(QueueParams),
-  supervisor:terminate_child(esque_puller_spec, Spec).
+  Name = ?QUEUE_NAME(QueueParams),
+  Spec = list_to_atom(?QUEUE_PULLER_PREFIX ++ Name),
+  supervisor:terminate_child(esque_puller_sup, Spec),
+  supervisor:delete_child(esque_puller_sup, Spec).
 
 -spec queue([tuple()], term()) -> integer().
 queue(QueueParams, Payload) ->
