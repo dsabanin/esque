@@ -83,10 +83,7 @@ handle_info({dropped, NumMessages, Client}, #state{ ctl_key = CtlKey, queue_key 
   lager:debug("puller ~s lost ~s messages due to volume from redis", [QueueKey, NumMessages]),
   Wait = pull_and_work(CtlKey, QueueKey, Module, Method),
   eredis_sub:ack_message(Client),
-  {noreply, State, Wait};
-handle_info(Info, State) ->
-  lager:debug("got something interesting: ~p ~p",[Info, self()]),
-  {noreply, State, ?IDLE_PERIOD_MS}.
+  {noreply, State, Wait}.
 
 terminate(_Reason, _State) ->
   ok.

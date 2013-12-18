@@ -8,7 +8,8 @@ all() ->
     start_test,
     add_queue,
     stop_queue,
-    multiple_workers
+    multiple_workers,
+    node_specific
   ].
 
 start_test(Config) ->
@@ -57,6 +58,18 @@ multiple_workers(Config) ->
   end,
   Config.
 
+node_specific(Config) ->
+  start_test(Config),
+  Queue = [{name, "node_specific"}, {workers, 1}, {node_specific, true}, {action, {esque_SUITE, add_queue_callback}}],
+  esque:add_queue(Queue),
+  esque:queue(Queue, [self()]),
+  receive
+    done -> ct:log("got done")
+  after 2000 ->
+    throw(queue_not_processed)
+  end,
+  Config.
+  
 add_queue_callback(Pid) ->
   Pid ! done.
 
