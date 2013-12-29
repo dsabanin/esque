@@ -30,7 +30,7 @@ start_link() ->
 %% @hidden
 -spec init([]) -> {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
 init([]) ->
-  Children = [pool_def(redis_pool)],
+  Children = [pool_def(esque_redis_pool)],
   lager:info("Initializing esque redis supervisor ..."),
   {ok, {{one_for_one, 5, 10}, Children}}.
 

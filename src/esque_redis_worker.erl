@@ -33,16 +33,16 @@ init([{host, Host},
 
 -spec q(binary() | string(),list()) -> {ok,binary()} | {ok,[]}.
 q(Method,Values) ->
-  wpool:call(redis_pool,{q,Method,Values}).
+  wpool:call(esque_redis_pool,{q,Method,Values}).
 
 %% Pipelining
 -spec qp([list()]) -> [{ok,binary() | []}].
 qp(Commands) ->
-  wpool:call(redis_pool,{qp, Commands}).
+  wpool:call(esque_redis_pool,{qp, Commands}).
 
 -spec expire(string()) -> {ok,binary()} | {ok,[]}.
 expire(Key) ->
-  wpool:call(redis_pool,{q,"EXPIRE",[Key,1]}).
+  wpool:call(esque_redis_pool,{q,"EXPIRE",[Key,1]}).
 
 -spec handle_call(term(), {pid(),_}, #state{}) -> {reply, term(), #state{}}.
 handle_call({q,Method,Values}, _From, State = #state{ process_id = P}) ->
