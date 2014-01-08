@@ -62,8 +62,11 @@ queue(QueueName, QueueParams, Payload) when is_atom(QueueName) ->
 queue(QueueName, QueueParams, Payload) when is_list(QueueName) ->
   queue([{name, QueueName}] ++ proplists:delete(name, QueueParams), Payload).
 
+%% Payload MUST be a list of arguments.
+%% Payload will eventually be the Args parameter in
+%% erlang:apply(Module, Function, Args).
 -spec queue([tuple()], list()) -> integer().
-queue(QueueParams, Payload) when is_list(QueueParams) ->
+queue(QueueParams, Payload) when is_list(QueueParams), is_list(Payload) ->
   Name = ?QUEUE_NAME(QueueParams),
   Key = ?QUEUE_KEY(Name),
   Command = [

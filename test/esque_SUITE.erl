@@ -9,7 +9,8 @@ all() ->
     add_queue,
     stop_queue,
     multiple_workers,
-    node_specific
+    node_specific,
+    wrong_params_to_payload
   ].
 
 start_test(Config) ->
@@ -67,6 +68,17 @@ node_specific(Config) ->
     done -> ct:log("got done")
   after 2000 ->
     throw(queue_not_processed)
+  end,
+  Config.
+
+wrong_params_to_payload(Config) ->
+  start_test(Config),
+  Queue = [{name, "wrong_params_to_payload"}, {workers, 1}, {action, {foo, bar}}],
+  esque:add_queue(Queue),
+  try
+    esque:queue(wrong_params_to_payload, [], atom)
+  catch
+    error:function_clause -> ct:log("~p ~p", [error, function_clause])
   end,
   Config.
   
