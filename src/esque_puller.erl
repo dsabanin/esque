@@ -42,7 +42,10 @@ init(QueueParams) ->
   MaxConcurrentWorkers = proplists:get_value(workers, QueueParams, ?DEFAULT_WORKERS),
   cxy_ctl:init([{CtlKey, MaxConcurrentWorkers, ?TIMER_HISTORY_COUNT}]),
 
-  {ok, Sub} = eredis_sub:start_link(),
+  {ok, Config} = application:get_env(esque, redis_pool),
+  R = proplists:get_value(worker_config, Config),
+  [Host, Port, Password] = [ proplists:get_value(X, R) || X <- [host, port, pwd]],
+  {ok, Sub} = eredis_sub:start_link(Host, Port, Password),
   start_subscription(Sub, SubKey),
 
   {ok, #state{sub = Sub, queue_key = QueueKey, ctl_key = CtlKey, module = Module, method = Method}, 0}.

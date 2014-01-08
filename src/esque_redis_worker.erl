@@ -20,12 +20,9 @@ stop(Pid) when is_pid(Pid) ->
   gen_server:cast(Pid, stop).
 
 -spec init(term()) -> {ok,#state{}}.
-init([{host, Host},
-      {port, Port},
-      {database, Database},
-      {pwd, Password},
-      {reconnect_sleep, ReconnectSleep}]) ->
-
+init(Params) ->
+  [Host, Port, Database, Password, ReconnectSleep] = [ proplists:get_value(X, Params)
+    || X <- [host, port, database, pwd, reconnect_sleep]], 
   {ok, C} = eredis:start_link(Host, Port, Database, Password, ReconnectSleep),
   lager:debug("Started Redis Worker with  ~p ",[C]),
   {ok, #state{process_id = C}}.
