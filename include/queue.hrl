@@ -1,5 +1,4 @@
--define(QUEUE_PULLER_PREFIX, "esque_puller_").
--define(QUEUE_WP_PREFIX, "esque_worker_").
+-define(QUEUE_WORKER_PREFIX, "esque_worker_").
 -define(QUEUE_SUB_POSTFIX, "_sub").
 -define(NAMESPACE, "esque").
 -define(IDLE_PERIOD_MS, 1000).

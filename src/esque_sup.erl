@@ -27,5 +27,5 @@ init([]) ->
   {ok, {{one_for_one, 100, 60},
       [
         {esque_redis_sup, {esque_redis_sup, start_link, []}, permanent, infinity, supervisor, [esque_redis_sup]},
-        {esque_puller_sup, {esque_puller_sup, start_link, []}, permanent, infinity, supervisor, [esque_puller_sup]}
+        {esque_worker_sup, {esque_worker_sup, start_link, []}, permanent, infinity, supervisor, [esque_worker_sup]}
       ]}}.

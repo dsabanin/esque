@@ -5,7 +5,7 @@
 %%% @end
 %%%-------------------------------------------------------------------
 
--module(esque_puller_sup).
+-module(esque_worker_sup).
 
 -behaviour(supervisor).
 

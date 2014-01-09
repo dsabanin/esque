@@ -46,15 +46,15 @@ add_queue(Name) when is_atom(Name) ->
   add_queue([{name, atom_to_list(Name)}]);
 add_queue(Q) ->
   Spec = sup_spec(Q),
-  supervisor:start_child(esque_puller_sup, Spec),
+  supervisor:start_child(esque_worker_sup, Spec),
   ok.
 
 -spec stop_queue([tuple()]) -> ok.
 stop_queue(QueueParams) -> 
   Name = ?QUEUE_NAME(QueueParams),
-  Spec = list_to_atom(?QUEUE_PULLER_PREFIX ++ Name),
-  supervisor:terminate_child(esque_puller_sup, Spec),
-  supervisor:delete_child(esque_puller_sup, Spec).
+  Spec = list_to_atom(?QUEUE_WORKER_PREFIX ++ Name),
+  supervisor:terminate_child(esque_worker_sup, Spec),
+  supervisor:delete_child(esque_worker_sup, Spec).
 
 -spec queue(atom() | string() , [tuple()], term()) -> integer().
 queue(QueueName, QueueParams, Payload) when is_atom(QueueName) ->
@@ -80,11 +80,11 @@ queue(QueueParams, Payload) when is_list(QueueParams), is_list(Payload) ->
 sup_spec(Q) ->
   Name = ?QUEUE_NAME(Q),
   {
-    list_to_atom(?QUEUE_PULLER_PREFIX ++ Name),
-    {esque_puller, start_link, [Q]},
+    list_to_atom(?QUEUE_WORKER_PREFIX ++ Name),
+    {esque_worker, start_link, [Q]},
     permanent,
     brutal_kill,
     worker,
-    [esqueue_puller]}.
+    [esqueue_worker]}.
 
   

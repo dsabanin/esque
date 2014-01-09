@@ -10,6 +10,7 @@ all() ->
     stop_queue,
     multiple_workers,
     node_specific,
+    retry,
     wrong_params_to_payload
   ].
 
@@ -34,7 +35,7 @@ stop_queue(Config) ->
   esque:add_queue([{name, "delete"}]),
   esque:stop_queue([{name, "delete"}]),
   esque:add_queue([{name, "delete"}]),
-  case whereis(esque_puller_delete) of
+  case whereis(esque_worker_delete) of
     undefined -> throw(failed);
     D when is_pid(D) -> ok
   end,
@@ -82,6 +83,37 @@ wrong_params_to_payload(Config) ->
   end,
   Config.
   
+retry(Config) -> 
+  start_test(Config),
+  Queue = [{name, "retry_esque_test"}, {workers, 1}, {retry_options, [{retry_unless, ok}]}, {action, {esque_SUITE, retry_callback}}],
+  Pid = spawn(fun retry_waiter/0),
+  esque:add_queue(Queue),
+  esque:queue(Queue, [Pid, self()]),
+  receive
+    done -> ok
+  after 2000 ->
+    throw(retry_failed)
+  end,
+  Config.
+
+%% ---- helpers
+
 add_queue_callback(Pid) ->
   Pid ! done.
 
+retry_callback(WaiterPid, TestPid) -> 
+  WaiterPid ! called,
+  case whereis(retry_waiter_called) of
+    undefined -> not_ok;
+    WaiterPid -> TestPid ! done, ok
+  end.
+
+retry_waiter() -> 
+  receive
+    called -> 
+      ct:log("retry_waiter called once"),
+      erlang:register(retry_waiter_called, self()),
+      receive
+        called -> ct:log("retry_waiter called again")
+      end
+  end.
