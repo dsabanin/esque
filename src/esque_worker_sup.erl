@@ -27,6 +27,6 @@ start_link() ->
 %% Supervisor callbacks
 %% ===================================================================
 %% @hidden
--spec init([]) -> {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
-init([]) -> {ok, {{one_for_one, 5, 10}, []}}.
+-spec init([]) -> {ok, {{one_for_one, 500, 1}, [supervisor:child_spec()]}}.
+init([]) -> {ok, {{one_for_one, 500, 1}, []}}.
 
