@@ -11,7 +11,8 @@
 -export([
     start_link/1,
     noop/1,
-    work_and_retry/6
+    work_and_retry/6,
+    work_and_track_failures/5
   ]).
 
 -define(DEFAULT_WORKERS, 1).
@@ -102,12 +103,26 @@ pull_and_work(CtlKey, QueueKey, Module, Method, Options) ->
     undefined -> ?IDLE_PERIOD_MS;
     Binary ->
       Item = erlang:binary_to_term(Binary),
-      RetryOptions = proplists:get_value(retry_options, Options),
-      case {RetryOptions, catch proplists:get_value(retry_unless, RetryOptions)} of
-        {undefined, _} -> cxy_ctl:execute_task(CtlKey, Module, Method, Item);
+      RetryOptions = proplists:get_value(retry_options, Options,[]),
+      case {RetryOptions,proplists:get_value(retry_unless, RetryOptions)} of
+        {[], _} ->  cxy_ctl:execute_task(CtlKey, ?MODULE, work_and_track_failures, [Module, Method, Item, QueueKey, Binary]);
         {_List, Expect} -> cxy_ctl:execute_task(CtlKey, ?MODULE, work_and_retry, [Module, Method, Item, Expect, QueueKey, Binary])
       end, 0
   end.
+
+
+work_and_track_failures(Module, Method, Args, QueueKey, Binary) ->
+  try 
+    erlang:apply(Module, Method, Args) 
+  catch 
+    _:Exception ->
+      StackTrace = erlang:get_stacktrace(),
+      FailedQueueKey = ?QUEUE_KEY_FAILED(QueueKey),
+      lager:error("~p:~p(~p) on queue ~p. got exception ~p and stacktrace ~p", [Module, Method, Args, QueueKey, Exception, StackTrace]),
+      FailurePayload = [{params,Binary},{exception,Exception},{stacttrace,StackTrace}],
+      esque_redis_worker:q("lpush", [FailedQueueKey, term_to_binary(FailurePayload)])
+  end.
+
 
 %% cty_ctl will call us
 work_and_retry(Module, Method, Args, Expect, QueueKey, Binary) -> 

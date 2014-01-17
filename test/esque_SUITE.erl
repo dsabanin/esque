@@ -11,7 +11,8 @@ all() ->
     multiple_workers,
     node_specific,
     retry,
-    wrong_params_to_payload
+    wrong_params_to_payload,
+    track_failure
   ].
 
 start_test(Config) ->
@@ -93,6 +94,28 @@ retry(Config) ->
     done -> ok
   after 2000 ->
     throw(retry_failed)
+  end,
+  Config.
+
+track_failure(Config) -> 
+  start_test(Config),
+  Queue = [{name, "track_failure_test"}, {workers, 1}, {action, {esque_SUITE, this_method_does_not_exists}}],
+  esque:add_queue(Queue),
+  esque:queue(Queue, [self()]),
+  receive
+    done -> throw(track_failure_failed_with_invalid_method)
+  after 2000 ->
+      {ok,JobCount} = esque:failed_jobs_count(Queue),
+      {ok,BinaryResult} = esque:failed_job(Queue),
+      ct:log("Job ~p",[binary_to_term(BinaryResult)]),
+      FailedJob = binary_to_term(BinaryResult),
+      %% this error is bound to the method the queue is trying to call which is in fact
+      %% undefined
+      undef = proplists:get_value(exception,FailedJob),
+      case binary_to_integer(JobCount) of
+        1 -> ok;
+        _OtherValue -> throw(track_failure_failed) 
+      end
   end,
   Config.
 
