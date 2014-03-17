@@ -3,7 +3,14 @@
   {description, "Esque"},
   {vsn, "0.0.5"},
   {registered, []},
-  {applications, [kernel, stdlib, lager]},
+  {applications, [
+	kernel,
+	stdlib,
+	lager,
+	eredis,
+	dk_cxy,
+	worker_pool
+	]},
   {mod, {esque, []}},
   {env, [ 
     {redis_port, 6379},
