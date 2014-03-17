@@ -23,10 +23,16 @@ stop(Pid) when is_pid(Pid) ->
 init(Params) ->
   [Host, Port, Database, Password, ReconnectSleep] = [ proplists:get_value(X, Params)
     || X <- [host, port, database, pwd, reconnect_sleep]], 
-  {ok, C} = eredis:start_link(Host, Port, Database, Password, ReconnectSleep),
+
+  {ok, C} = eredis:start_link(read_env_or("REDIS_HOST", Host), Port, Database, Password, ReconnectSleep),
   lager:debug("Started Redis Worker with  ~p ",[C]),
   {ok, #state{process_id = C}}.
 
+read_env_or(Key, Default) ->
+  case os:getenv(Key) of
+    false -> Default;
+    Value -> Value
+  end.
 
 -spec q(binary() | string(),list()) -> {ok,binary()} | {ok,[]}.
 q(Method,Values) ->

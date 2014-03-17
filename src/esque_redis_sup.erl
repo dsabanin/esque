@@ -36,7 +36,7 @@ init([]) ->
 
 pool_def(Name) ->
   {ok, Config} = application:get_env(esque, redis_pool),
-  WorkerDef = [Name,[
+  WorkerDef = [Name, [
       {overrun_warning, proplists:get_value(overrun_warning, Config)},
       {workers, proplists:get_value(workers, Config)},
       {worker, {esque_redis_worker, proplists:get_value(worker_config, Config)}}
