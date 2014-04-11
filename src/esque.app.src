@@ -7,8 +7,6 @@
 	kernel,
 	stdlib,
 	lager,
-	eredis,
-	dk_cxy,
 	worker_pool
 	]},
   {mod, {esque, []}},
