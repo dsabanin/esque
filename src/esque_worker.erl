@@ -102,7 +102,7 @@ pull_and_work(CtlKey, QueueKey, Module, Method, Options) ->
   case Result of
     undefined -> ?IDLE_PERIOD_MS;
     Binary ->
-      Item = erlang:binary_to_term(Binary),
+      Item = esque:deserialize(Binary),
       RetryOptions = proplists:get_value(retry_options, Options,[]),
       case {RetryOptions,proplists:get_value(retry_unless, RetryOptions)} of
         {[], _} ->  cxy_ctl:execute_task(CtlKey, ?MODULE, work_and_track_failures, [Module, Method, Item, QueueKey, Binary]);
