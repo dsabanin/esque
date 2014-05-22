@@ -19,7 +19,9 @@
     queue/2,
     failed_jobs_count/1,
     clean_queue_failed_jobs/1,
-    failed_job/1
+    failed_job/1,
+    serialize/2,
+    deserialize/1
     ]).
 
 -include("include/queue.hrl").
@@ -74,13 +76,27 @@ queue(QueueParams, Payload) when is_list(QueueParams), is_list(Payload) ->
   Key = ?QUEUE_KEY(Name),
   Command = [
     ["multi"],
-    ["lpush", [Key], erlang:term_to_binary(Payload)],
+    ["lpush", [Key], serialize(?QUEUE_FORMAT(QueueParams), Payload)],
     ["publish", ?QUEUE_SUB_KEY(Name), "new"],
     ["exec"]],
   [_, _, _, {ok, [Size, _]}] = esque_redis_worker:qp(Command),
   binary_to_integer(Size). 
 
+serialize(erlang, Term) ->
+  erlang:term_to_binary(Term);
+serialize(json, Term) ->
+  jsx:encode(Term).
 
+deserialize(Binary) ->
+  case jsx:is_json(Binary) of
+    true -> deserialize(json, Binary);
+    false -> deserialize(erlang, Binary)
+  end.
+
+deserialize(erlang, Binary) ->
+  erlang:binary_to_term(Binary);
+deserialize(json, Binary) ->
+  jsx:decode(Binary).
 
 -spec failed_jobs_count([tuple()] | atom()) -> integer().
 failed_jobs_count(QueueName) when is_atom(QueueName) ->
