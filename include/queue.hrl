@@ -10,9 +10,5 @@
     false -> proplists:get_value(name, QueueProps)
   end).
 -define(QUEUE_FORMAT(QueueProps),
-  ((fun() ->
-      case proplists:get_value(format, QueueProps, default) of
-        default -> {ok, Format} = application:get_env(esque, format), Format;
-        Format -> Format
-      end))().
+  proplists:get_value(format, QueueProps, erlang:element(2, application:get_env(esque, format)))).
 -define(QUEUE_KEY_FAILED(QueueKey),QueueKey ++ "_failed").
