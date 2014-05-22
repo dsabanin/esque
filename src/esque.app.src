@@ -15,6 +15,7 @@
   {mod, {esque, []}},
   {env, [
     {format, erlang},
+    {redis_namespace, "esque"},
     {redis_port, 6379},
     {redis_host, "localhost"},
     {redis_pool,[
