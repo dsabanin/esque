@@ -6,8 +6,11 @@
   {applications, [
 	kernel,
 	stdlib,
+	syntax_tools,
+	goldrush,
 	lager,
-	worker_pool
+	worker_pool,
+    jsx
 	]},
   {mod, {esque, []}},
   {env, [
@@ -23,5 +26,5 @@
         {pwd, ""},
         {reconnect_sleep, 100}]}
       ]}
-    ]}  
-  ]}. 
+    ]}
+  ]}.

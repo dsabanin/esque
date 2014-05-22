@@ -29,7 +29,7 @@
 %% This is called when the application is started by reltool
 -spec start() -> ok | {error, term()}.
 start() ->
-  application:start(?MODULE),
+  application:ensure_all_started(?MODULE),
   start(normal, []).
 
 %% @hidden
