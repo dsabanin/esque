@@ -1,6 +1,6 @@
 -define(QUEUE_WORKER_PREFIX, "esque_worker_").
 -define(QUEUE_SUB_POSTFIX, "_sub").
--define(NAMESPACE, "esque").
+-define(NAMESPACE, erlang:element(2, application:get_env(esque, redis_namespace))).
 -define(IDLE_PERIOD_MS, 1000).
 -define(QUEUE_KEY(QueueName), ?NAMESPACE ++ ":queue:" ++ QueueName).
 -define(QUEUE_SUB_KEY(QueueName), ?QUEUE_KEY(QueueName) ++ ?QUEUE_SUB_POSTFIX).
